@@ -1,0 +1,10 @@
+G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\TermoWifi.csprojResolveAssemblyReference.cache
+G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\Window1.baml
+G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\Window1.g.cs
+G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\App.g.cs
+G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\TermoWifi_MarkupCompile.cache
+G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\TermoWifi.g.resources
+G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\bin\Debug\TermoWifi.exe
+G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\bin\Debug\TermoWifi.pdb
+G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\TermoWifi.exe
+G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\TermoWifi.pdb
