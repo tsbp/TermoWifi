@@ -8,3 +8,5 @@ G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\bin\Debug\TermoWifi.exe
 G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\bin\Debug\TermoWifi.pdb
 G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\TermoWifi.exe
 G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\TermoWifi.pdb
+G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\ConfigsWindow.baml
+G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\ConfigsWindow.g.cs

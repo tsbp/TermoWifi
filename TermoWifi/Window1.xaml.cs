@@ -16,6 +16,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace TermoWifi
 {
@@ -43,9 +44,35 @@ namespace TermoWifi
 	    //==============================================================
 		public Window1()
 		{
-			InitializeComponent();			
+			InitializeComponent();	
+		}		
+		//==============================================================
+		private void Window_Loaded(object sender, RoutedEventArgs e)
+		{
+			DispatcherTimer dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
+            dispatcherTimer.Start();			
+		}	
+		//==============================================================
+		private void dispatcherTimer_Tick(object sender, EventArgs e)
+		{
 			
-		}
+
+		    for(int i = 0; i < aBuf.Length-1; i++) 		    	aBuf[i] = aBuf[i+1];;
+		    
+		    Random rnd = new Random();
+		    aBuf[aBuf.Length-1]  = (short) rnd.Next(-100, 450);
+		    
+		    timeLbl.Content = aBuf[aBuf.Length-1] + DateTime.Now.ToString("HH:mm:ss");		    
+		    CommandManager.InvalidateRequerySuggested();
+			
+		    inTemp.Content = 	Convert.ToString(aBuf[aBuf.Length-1]);
+		    outTemp.Content = 	Convert.ToString(aBuf[aBuf.Length-1]);
+		    
+		    plot(Can1);	
+			plot(Can2);	
+		}			
 		//==============================================================
 		private void addLine (int x, int y, int x2, int y2, Brush col, int thik, Canvas Can)
 		{
@@ -63,6 +90,7 @@ namespace TermoWifi
 		//==============================================================
 		private void plot(Canvas can)
 		{
+			can.Children.Clear();
 			AREA_HEIGH = (int) Can1.ActualHeight;
 			AREA_WIDTH = (int) Can1.ActualWidth;
 			
@@ -101,18 +129,18 @@ namespace TermoWifi
              pnt.X = 0;
              pnt.Y = aY + TOP_OFFSET+7;
 
-             DrawText(can, "123", pnt, 13, HorizontalAlignment.Left, VerticalAlignment.Center);
+             DrawText(can, Convert.ToString(tmax / 10), pnt, 13, HorizontalAlignment.Left, VerticalAlignment.Center);
              
              pnt = new Point();
              pnt.X = 0;
              pnt.Y = aY + AREA_HEIGH-10;
 
-             DrawText(can, "123", pnt, 13, HorizontalAlignment.Left, VerticalAlignment.Center);
+             DrawText(can, Convert.ToString(tmax / 10), pnt, 13, HorizontalAlignment.Left, VerticalAlignment.Center);
 	         
 	         for(int i = 0; i < POINTS_CNT-1; i++)	         
 	         	addLine (i*HGRID_SPACING + LEFT_OFFSET,       aY + PLOT_HEIGH + TOP_OFFSET - (int)((aBuf[i]   - tmin)*cena),
 	         	                 (i+1) *HGRID_SPACING + LEFT_OFFSET, aY + PLOT_HEIGH + TOP_OFFSET - (int)((aBuf[i+1] - tmin)*cena),
-	         	                Brushes.Red, 5, can);	        
+	         	                Brushes.Red, 3, can);	        
 		}
 		//==============================================================
 		// Position a label at the indicated point.
@@ -143,16 +171,19 @@ namespace TermoWifi
 		        y -= label.DesiredSize.Height;
 		    Canvas.SetTop(label, y);
 		}
-		//==============================================================
-		private void Window_Loaded(object sender, RoutedEventArgs e)
-		{
-			plot(Can1);	
-			plot(Can2);	
-		}
 		
+		//==============================================================
 		private void CloseButton_Click(object sender, RoutedEventArgs e)
-			{
-				Close();
-			}
+		{
+			Close();
+		}
+		//==============================================================
+		private void btnConfigsClick(object sender, RoutedEventArgs e)
+		{
+			ConfigsWindow cWin = new ConfigsWindow();			
+			cWin.ShowDialog();
+        	
+        
+		}
 	}
 }
