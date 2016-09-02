@@ -1,8 +1,8 @@
 ﻿/*
  * Created by SharpDevelop.
  * User: Voodoo
- * Date: 09/02/2016
- * Time: 15:52
+ * Date: 02.09.2016
+ * Time: 17:00
  * 
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
@@ -19,7 +19,7 @@ using System.Windows.Media;
 namespace TermoWifi
 {
 	/// <summary>
-	/// Interaction logic for Window2.xaml
+	/// Interaction logic for ConfigsWindow.xaml
 	/// </summary>
 	public partial class ConfigsWindow : Window
 	{
