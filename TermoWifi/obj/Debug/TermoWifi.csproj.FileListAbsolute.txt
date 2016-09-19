@@ -10,3 +10,17 @@ G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\TermoWifi.exe
 G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\TermoWifi.pdb
 G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\ConfigsWindow.baml
 G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\ConfigsWindow.g.cs
+D:\Temp\1\TermoWifi\TermoWifi\bin\Debug\TermoWifi.exe
+D:\Temp\1\TermoWifi\TermoWifi\bin\Debug\TermoWifi.pdb
+D:\Temp\1\TermoWifi\TermoWifi\obj\Debug\TermoWifi.csprojResolveAssemblyReference.cache
+D:\Temp\1\TermoWifi\TermoWifi\obj\Debug\ConfigsWindow.baml
+D:\Temp\1\TermoWifi\TermoWifi\obj\Debug\Window1.baml
+D:\Temp\1\TermoWifi\TermoWifi\obj\Debug\ConfigsWindow.g.cs
+D:\Temp\1\TermoWifi\TermoWifi\obj\Debug\Window1.g.cs
+D:\Temp\1\TermoWifi\TermoWifi\obj\Debug\App.g.cs
+D:\Temp\1\TermoWifi\TermoWifi\obj\Debug\TermoWifi_MarkupCompile.cache
+D:\Temp\1\TermoWifi\TermoWifi\obj\Debug\TermoWifi.g.resources
+D:\Temp\1\TermoWifi\TermoWifi\obj\Debug\TermoWifi.exe
+D:\Temp\1\TermoWifi\TermoWifi\obj\Debug\TermoWifi.pdb
+G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\PartConfig.baml
+G:\Voodoo\VS2010Projects\TermoWifi\TermoWifi\obj\Debug\PartConfig.g.cs
