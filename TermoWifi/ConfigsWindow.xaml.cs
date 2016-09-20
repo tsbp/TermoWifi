@@ -31,6 +31,11 @@ namespace TermoWifi
 		public static string  tempReturn;
 		public static string  timeReturn;
 		
+		const int MODE_GET_WEEK  = 0;
+		const int MODE_GET_WORK  = 1;
+		const int MODE_GET_HOLLY = 2;
+		int currentMode = MODE_GET_WEEK;
+		
 		public class User
         {
                 public string PicTime { get; set; }
@@ -47,41 +52,9 @@ namespace TermoWifi
 		//==============================================================
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
-					
-//				List<User> items = new List<User>();
 				lvConfigs.ItemsSource = items;
-//				items.Add(new User() {  Time = "18:44",   Temp = "25.4"});
-//				items.Add(new User() {  Time = "22:27",   Temp = "21.8"});
-				//items.Add(new User() { PicTime = new Image { Width = 16, Height = 16, Source = new BitmapImage(new Uri("pack://application:,,,/TermoWifi;component/drawable/timeicon.png")) }, Time = "12:24",   Temp = "23.4"});
-				
-//				
-//				ListBoxItem lbItem = new ListBoxItem();
-//				lbItem.Content = "123";
-//				lbConfigs.Items.Add(lbItem);
 		}					
-//		//==============================================================
-//		private void lvButton_Click(object sender, RoutedEventArgs e)
-//		{            			
-//			FrameworkElement fe = (FrameworkElement)sender;
-//			object it = fe.DataContext;
-//			int aa = lvConfigs.Items.IndexOf(it);
-//			
-//	        string sTemp = null, sTime = null;
-//	        
-//			ConfigsWindow.User a = it as ConfigsWindow.User;
-//			if (a!=null)
-//			{
-//				sTemp = a.Temp;
-//				sTime = a.Time;
-//			}
-//			
-//			PartConfig cWin = new PartConfig();		
-//			cWin.lblTemp.Content = sTemp;
-//			cWin.lblTime.Content = sTime;
-//			cWin.Show();
-//
-//		}
-		
+	
 		//==============================================================
 		private void CloseButton_Click(object sender, RoutedEventArgs e)
 		{
@@ -90,6 +63,7 @@ namespace TermoWifi
 		//==============================================================
 		void Button_Click(object sender, RoutedEventArgs e)
 		{
+			currentMode = MODE_GET_WORK;
 			items.Add(new User() {
 			          	PicTime = "/TermoWifi;component/drawable/timeicon.png",
 			          	Time = "12:24", 
@@ -97,23 +71,58 @@ namespace TermoWifi
 			          	Temp = "28,2"});
 		}
 		//==============================================================
+		string [] weekDays = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"};
+		byte dayType	= 0x60;
+		//==============================================================
+		void Button_Click_week(object sender, RoutedEventArgs e)
+		{
+			currentMode = MODE_GET_WEEK;
+			
+			for(int i = 0; i < 7; i++)
+			{
+				string path = "/TermoWifi;component/drawable/";
+				if((dayType & (1 << i)) != 0) 	path += "beer.png";
+				else 							path += "shovel.png";
+				items.Add(new User() {PicTime = path, Time = weekDays[i]});
+			}
+			
+		}
+		//==============================================================
 		int currentItem;
 		//==============================================================
 		void lvConfigs_SelectionChanged(object sender, MouseButtonEventArgs e)
-		{
+		{			
 			ListView fe = (ListView)sender;
+			currentItem = fe.SelectedIndex;
+			string sTemp = null, sTime = null;
 			
-	        string sTemp = null, sTime = null;
-	        currentItem = fe.SelectedIndex;
-	        
-	        sTemp = items[fe.SelectedIndex].Temp;
-	        sTime = items[fe.SelectedIndex].Time;	      
-			
-			PartConfig cWin = new PartConfig();		
-			cWin.lblTemp.Content = sTemp;
-			cWin.lblTime.Content = sTime;
-			cWin.Closed += cWinClosed;
-			cWin.Show();
+			switch(currentMode)
+			{
+				case MODE_GET_WEEK:
+					dayType ^= (byte)(1 << currentItem);
+					
+					string path = "/TermoWifi;component/drawable/";
+					if((dayType & (1 << currentItem)) != 0) 	items[currentItem].PicTime = path + "beer.png";
+					else 										items[currentItem].PicTime = path + "shovel.png";
+					
+					lvConfigs.Items.Refresh();
+					break;
+					
+				case MODE_GET_WORK:
+					sTemp = items[currentItem].Temp;
+			        sTime = items[currentItem].Time;	      
+					
+					PartConfig cWin = new PartConfig();		
+					cWin.lblTemp.Content = sTemp;
+					cWin.lblTime.Content = sTime;
+					cWin.Closed += cWinClosed;
+					cWin.Show();
+					break;
+					
+				case MODE_GET_HOLLY:
+					break;
+			}
+	       
 		}
 		//==============================================================
 		public void cWinClosed(object sender, System.EventArgs e)

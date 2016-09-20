@@ -111,7 +111,7 @@
     <None Include="Drawable\bdel.png" />
     <Resource Include="Drawable\bdel.png" />
     <None Include="Drawable\beer.png" />
-    <None Include="Drawable\beer.png" />
+    <Resource Include="Drawable\beer.png" />
     <None Include="Drawable\bload.png" />
     <None Include="Drawable\bload.png" />
     <None Include="Drawable\bsave.png" />
@@ -136,7 +136,7 @@
     <None Include="Drawable\setbutton.png" />
     <Resource Include="Drawable\setbutton.png" />
     <None Include="Drawable\shovel.png" />
-    <None Include="Drawable\shovel.png" />
+    <Resource Include="Drawable\shovel.png" />
     <None Include="Drawable\tempicon.png" />
     <Resource Include="Drawable\tempicon.png" />
     <None Include="Drawable\timeicon.png" />

@@ -38,7 +38,7 @@ namespace TermoWifi
 			slTemp.Value = a - 19;
 			
 			string b = lblTime.Content.ToString();
-			slTimeH.Value = double.Parse(b.Substring(0, b.IndexOf(":"))) / 2.4;			
+			slTimeH.Value = 0.5 + double.Parse(b.Substring(0, b.IndexOf(":"))) / 2.4;			
 			slTimeM.Value = double.Parse(b.Substring(b.IndexOf(":") + 1)) / 5.9;
 		}
 		//==============================================================
