@@ -2,7 +2,7 @@
 <Window
 	x:Class="TermoWifi.ConfigsWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	Title="TermoWifi"
-	Height="800"
+	Height="720"
 	Width="480"	
 	WindowStyle="None"
 	AllowsTransparency="True"

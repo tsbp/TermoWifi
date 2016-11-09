@@ -218,23 +218,28 @@ namespace TermoWifi
 				switch(receiveBytes[0])
 		        {
 		            case (byte)0x10: // BROADCAST_DATA
-		                str = str.Substring(1,9) + "    ";
+						
+						
+						if(RemoteIpEndPoint.Address.ToString().Equals("192.168.0.100"))
+						{
+							ipString = RemoteIpEndPoint.Address.ToString();
+							localPort = RemoteIpEndPoint.Port;
+							str = str.Substring(1,9) + "    ";
 		                
-		                if(str[0] != '0')
-		                	rTmp1 = str.Substring(0,4);
-		                if(str[4] != '0')
-		                	rTmp2 = str.Substring(4,4);
-		                
-		                if(receiveBytes[9] != 0) str = (receiveBytes[11] + ":" + 
-		                                                receiveBytes[10] + ":"+ 
-		                                                receiveBytes[9] + ", " + 
-		                                                receiveBytes[12] + "." + 
-		                                                (receiveBytes[13]+1) + "."+ 
-		                                                receiveBytes[14]);
-		                
-		                timeLbl.Dispatcher.BeginInvoke((Action)(() => timeLbl.Content = rTmp1 + "  ...  " + rTmp2 + "\r\n" + str));
-		               
-		                
+			                if(str[0] != '0')
+			                	rTmp1 = str.Substring(0,4);
+			                if(str[4] != '0')
+			                	rTmp2 = str.Substring(4,4);
+			                
+			                if(receiveBytes[9] != 0) str = (receiveBytes[11] + ":" + 
+			                                                receiveBytes[10] + ":"+ 
+			                                                receiveBytes[9] + ", " + 
+			                                                receiveBytes[12] + "." + 
+			                                                (receiveBytes[13]+1) + "."+ 
+			                                                receiveBytes[14]);
+			                
+			                timeLbl.Dispatcher.BeginInvoke((Action)(() => timeLbl.Content = rTmp1 + "  ...  " + rTmp2 + "\r\n" + str));
+						}
 		                break;
 		
 		            case (byte) 0x21:// PLOT_DATA_ANS
@@ -253,7 +258,7 @@ namespace TermoWifi
 		        {
 		
 		        }
-		        System.Threading.Thread.Sleep(100);
+		        Thread.Sleep(100);
 			}
 	    }
 	    //===========================================================================================================================	
@@ -269,17 +274,17 @@ namespace TermoWifi
 	    	for(int i = 0; i< 24; i++)
 	    		aBuf[i] = (short) (receiveBytes[i*2+1] | (receiveBytes[i*2+2] << 8));
 	    	
-	    	            
+	    	 string tmp =   String.Format("{0,4:N1}", Convert.ToString((float)aBuf[aBuf.Length-1]/10));         
 	    	if(extTemp & !stop) 
 	    	{ 
-	    		outTemp.Content = Convert.ToString(aBuf[aBuf.Length-1]/10); 
+	    		outTemp.Content = tmp;
 	    		plot(Can2); 
 //	    		extTemp = false;
 //	    		stop = true;
 	    	}
 	    	else if(!stop)		
 	    	{ 
-	    		inTemp.Content  = Convert.ToString(aBuf[aBuf.Length-1]); 
+	    		inTemp.Content  = tmp;
 	    		plot(Can1); 
 //	    		extTemp = true;
 //	    		send_udp(8);
@@ -290,11 +295,12 @@ namespace TermoWifi
 	    } 
 		//===========================================================================================================================
 		byte [] udp_send_buf;
+		string ipString;
 		//===========================================================================================================================
 		void send_udp( int aBufLng)
 		{
 			UdpClient udpClient = new UdpClient();
-			udpClient.Connect("192.168.10.122", localPort);	
+			udpClient.Connect("192.168.0.100", localPort);	
 			
 			udp_send_buf = new byte[aBufLng];
             udp_send_buf[0] = (byte) 0x20;

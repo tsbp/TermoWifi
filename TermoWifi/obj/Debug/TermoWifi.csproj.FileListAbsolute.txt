@@ -38,3 +38,17 @@ E:\TEMP\WPF\TermoWifi.git\TermoWifi\obj\Debug\TermoWifi_MarkupCompile.cache
 E:\TEMP\WPF\TermoWifi.git\TermoWifi\obj\Debug\TermoWifi.g.resources
 E:\TEMP\WPF\TermoWifi.git\TermoWifi\obj\Debug\TermoWifi.exe
 E:\TEMP\WPF\TermoWifi.git\TermoWifi\obj\Debug\TermoWifi.pdb
+E:\Work\Software\TermoWifi\TermoWifi\bin\Debug\TermoWifi.exe
+E:\Work\Software\TermoWifi\TermoWifi\bin\Debug\TermoWifi.pdb
+E:\Work\Software\TermoWifi\TermoWifi\obj\Debug\TermoWifi.csprojResolveAssemblyReference.cache
+E:\Work\Software\TermoWifi\TermoWifi\obj\Debug\ConfigsWindow.baml
+E:\Work\Software\TermoWifi\TermoWifi\obj\Debug\PartConfig.baml
+E:\Work\Software\TermoWifi\TermoWifi\obj\Debug\Window1.baml
+E:\Work\Software\TermoWifi\TermoWifi\obj\Debug\ConfigsWindow.g.cs
+E:\Work\Software\TermoWifi\TermoWifi\obj\Debug\PartConfig.g.cs
+E:\Work\Software\TermoWifi\TermoWifi\obj\Debug\Window1.g.cs
+E:\Work\Software\TermoWifi\TermoWifi\obj\Debug\App.g.cs
+E:\Work\Software\TermoWifi\TermoWifi\obj\Debug\TermoWifi_MarkupCompile.cache
+E:\Work\Software\TermoWifi\TermoWifi\obj\Debug\TermoWifi.g.resources
+E:\Work\Software\TermoWifi\TermoWifi\obj\Debug\TermoWifi.exe
+E:\Work\Software\TermoWifi\TermoWifi\obj\Debug\TermoWifi.pdb
