@@ -49,6 +49,7 @@ namespace TermoWifi
         private static int localPort;
         
         BackgroundWorker bgWorker;
+        DispatcherTimer dispatcherTimer;
 	    //==============================================================
 		public Window1()
 		{
@@ -59,9 +60,9 @@ namespace TermoWifi
 		//==============================================================
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
-//			DispatcherTimer dispatcherTimer = new DispatcherTimer();
-//            dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
-//            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
+			 dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
 //            dispatcherTimer.Start();
 			
             remoteIPAddress = IPAddress.Parse ("192.168.10.122");
@@ -78,14 +79,13 @@ namespace TermoWifi
             
 		}	
 		//==============================================================
-//		private void dispatcherTimer_Tick(object sender, EventArgs e)
-//		{
-//		    inTemp.Content = 	Convert.ToString(aBuf[aBuf.Length-1]);
-//		    outTemp.Content = 	Convert.ToString(aBuf[aBuf.Length-1]);
-//		    
-//		    plot(Can1);	
-//			plot(Can2);	
-//		}			
+		private void dispatcherTimer_Tick(object sender, EventArgs e)
+		{
+		   stop = false;
+			if(extTemp) extTemp = false;
+			else extTemp = true;
+			send_udp(8);
+		}			
 		//==============================================================
 		private void addLine (int x, int y, int x2, int y2, Brush col, int thik, Canvas Can)
 		{
@@ -220,7 +220,7 @@ namespace TermoWifi
 		            case (byte)0x10: // BROADCAST_DATA
 						
 						
-						if(RemoteIpEndPoint.Address.ToString().Equals("192.168.0.100"))
+						if(RemoteIpEndPoint.Address.ToString().Equals("192.168.10.122"))
 						{
 							ipString = RemoteIpEndPoint.Address.ToString();
 							localPort = RemoteIpEndPoint.Port;
@@ -238,7 +238,7 @@ namespace TermoWifi
 			                                                (receiveBytes[13]+1) + "."+ 
 			                                                receiveBytes[14]);
 			                
-			                timeLbl.Dispatcher.BeginInvoke((Action)(() => timeLbl.Content = rTmp1 + "  ...  " + rTmp2 + "\r\n" + str));
+			                timeLbl.Dispatcher.BeginInvoke((Action)(() => timeLbl.Content = rTmp1 + "  ...  " + rTmp2 + " \\" + str + " \\"));
 						}
 		                break;
 		
@@ -272,9 +272,16 @@ namespace TermoWifi
 	    	
 	    	for(int i = 0; i< 24; i++) aBuf[i] = 0;
 	    	for(int i = 0; i< 24; i++)
-	    		aBuf[i] = (short) (receiveBytes[i*2+1] | (receiveBytes[i*2+2] << 8));
+	    		aBuf[i] = BitConverter.ToInt16(new byte[2] { receiveBytes[i*2+1], receiveBytes[i*2+2] }, 0);
 	    	
-	    	 string tmp =   String.Format("{0,4:N1}", Convert.ToString((float)aBuf[aBuf.Length-1]/10));         
+	    	string sign = "+";
+	    	if(aBuf[aBuf.Length-1] < 0) 
+	    	{
+	    		sign = "-";
+	    		aBuf[aBuf.Length-1] *= -1; 
+	    	}
+	    		
+	    	 string tmp = sign + String.Format("{0,4:N1}",((float)aBuf[aBuf.Length-1]/10));         
 	    	if(extTemp & !stop) 
 	    	{ 
 	    		outTemp.Content = tmp;
@@ -300,7 +307,7 @@ namespace TermoWifi
 		void send_udp( int aBufLng)
 		{
 			UdpClient udpClient = new UdpClient();
-			udpClient.Connect("192.168.0.100", localPort);	
+			udpClient.Connect(ipString, localPort);	
 			
 			udp_send_buf = new byte[aBufLng];
             udp_send_buf[0] = (byte) 0x20;
@@ -317,11 +324,18 @@ namespace TermoWifi
 		//===========================================================================================================================
 		void btnUpdateClick(object sender, RoutedEventArgs e)
 		{
-			stop = false;
-			if(extTemp) extTemp = false;
-			else extTemp = true;
-			send_udp(8);
+//			stop = false;
+//			if(extTemp) extTemp = false;
+//			else extTemp = true;
+//			send_udp(8);
+			 dispatcherTimer.Start();
 		}
+		//===========================================================================================================================
+		private void rectangle2_MouseDown(object sender, MouseButtonEventArgs e)
+		{
+			this.DragMove();
+		}
+		
 	}
 	
 }

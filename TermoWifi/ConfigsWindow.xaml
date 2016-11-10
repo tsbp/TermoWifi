@@ -12,8 +12,9 @@
 		<ImageBrush
 			ImageSource="drawable\setbackground.jpg"></ImageBrush>
 	</Window.Background>
-	<DockPanel>
+	
 		<DockPanel
+			MouseDown="rectangle2_MouseDown"
 			LastChildFill="False">
 			
 			<Button
@@ -93,5 +94,5 @@
 				</ListView.ItemTemplate>
 			</ListView>
 		</DockPanel>
-	</DockPanel>
+	
 </Window>

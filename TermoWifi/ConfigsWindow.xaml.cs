@@ -131,5 +131,10 @@ namespace TermoWifi
             items[currentItem].Time = timeReturn;
             lvConfigs.Items.Refresh();
         }
+		//===========================================================================================================================
+		private void rectangle2_MouseDown(object sender, MouseButtonEventArgs e)
+		{
+			this.DragMove();
+		}
 	}
 }
