@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Window
 	x:Class="TermoWifi.Window1" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	Title="TermoWifi"
@@ -132,8 +132,7 @@
 		</Grid>
 		<Label
 			Name="timeLbl"
-			FontSize="20"
-			Content="123"
+			FontSize="20"			
 			HorizontalContentAlignment="Center"
 			VerticalContentAlignment="Center"
 			Width="450"
@@ -147,12 +146,14 @@
 			Height="151.3">
 			<Grid.RowDefinitions>
 				<RowDefinition
-					Height="Auto" />
+					Height="Auto" />			   
 			</Grid.RowDefinitions>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition
 					Width="*" />
 				<ColumnDefinition
+					Width="200" />
+			<ColumnDefinition
 					Width="*" />
 			</Grid.ColumnDefinitions>
 			<Button
@@ -168,6 +169,23 @@
 				<Image
 					Source="Drawable\setbutton.png" />
 			</Button>
+			<Border
+				Grid.Column="1">
+				<Border.Effect>
+					<DropShadowEffect
+						ShadowDepth="5" />
+				</Border.Effect>
+				<Label
+					Name="lblTime"
+					HorizontalContentAlignment="Center"
+					Foreground="White"
+					VerticalContentAlignment="Center"
+					VerticalAlignment="Stretch"
+					HorizontalAlignment="Stretch"
+					FontWeight="Normal"
+					FontSize="30"
+					Content="" />
+			</Border>
 			<Button
 				Click="btnUpdateClick"
 				Height="100"
@@ -175,7 +193,7 @@
 				BorderBrush="Transparent"
 				BorderThickness="0"
 				Padding="0"
-				Grid.Column="1"
+				Grid.Column="2"
 				VerticalAlignment="Center"
 				HorizontalAlignment="Right">
 				<Image
