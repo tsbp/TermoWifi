@@ -86,6 +86,10 @@
       <DependentUpon>ConfigsWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Hysteresys_cfg.xaml.cs">
+      <DependentUpon>Hysteresys_cfg.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PartConfig.xaml.cs">
       <DependentUpon>PartConfig.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -99,6 +103,7 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="ConfigsWindow.xaml" />
+    <Page Include="Hysteresys_cfg.xaml" />
     <Page Include="PartConfig.xaml" />
     <Page Include="Window1.xaml" />
   </ItemGroup>
@@ -131,7 +136,7 @@
     <Resource Include="Drawable\outpic.png" />
     <Resource Include="Drawable\part_config_bg.jpg" />
     <None Include="Drawable\plot.png" />
-    <None Include="Drawable\plot.png" />
+    <Resource Include="Drawable\plot.png" />
     <None Include="Drawable\setbackground.jpg" />
     <Resource Include="Drawable\setbackground.jpg" />
     <None Include="Drawable\setbutton.png" />
@@ -145,7 +150,7 @@
     <None Include="Drawable\update.png" />
     <Resource Include="Drawable\update.png" />
     <None Include="Drawable\week.png" />
-    <None Include="Drawable\week.png" />
+    <Resource Include="Drawable\week.png" />
     <None Include="Drawable\wifi_off.png" />
     <None Include="Drawable\wifi_off.png" />
   </ItemGroup>

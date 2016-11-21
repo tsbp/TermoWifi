@@ -157,6 +157,8 @@
 					Width="*" />
 			</Grid.ColumnDefinitions>
 			<Button
+				Name="btnConfigs"
+				Visibility="Hidden"				
 				Click="btnConfigsClick"
 				Background="Transparent"
 				BorderBrush="Transparent"

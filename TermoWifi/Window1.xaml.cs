@@ -19,8 +19,8 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using System.ComponentModel;
+using System.Threading;
 
 namespace TermoWifi
 {
@@ -45,20 +45,23 @@ namespace TermoWifi
 	    
 	    short [] aBuf = new short[]{102,334,223,123,256,278,267,345,456,234,345,234,222,222,222,222,222,222,222,222,222,222,222,222};
 	    
-//	    private static IPAddress remoteIPAddress;        
-//        private static int localPort;
-//        DispatcherTimer dispatcherTimer;
+	    private static IPAddress masterIPAddress = null;        
+		DispatcherTimer nRespTimer;
 
         BackgroundWorker bgWorker;
         UdpClient udpClient;
         
         bool stop;
+        //==============================================================
+        struct packStruct
+	    {
+        	public byte [] data;
+			public IPAddress ipAddress;			
+	    };
 	    //==============================================================
 		public Window1()
 		{
 			InitializeComponent();	
-			
-			
 			
 			bgWorker = new BackgroundWorker();
 			bgWorker.DoWork += backgroundWorker_DoWork;
@@ -67,27 +70,35 @@ namespace TermoWifi
 			bgWorker.ProgressChanged += new ProgressChangedEventHandler(bgWorkerReport);
 			bgWorker.WorkerSupportsCancellation = true;
 			
-			udpClient = new UdpClient(7777);
+			nRespTimer = new DispatcherTimer();
+			nRespTimer.Interval = TimeSpan.FromMilliseconds(1000);
+			nRespTimer.Tick += nRespTimer_tick;
 			
+			udpClient = new UdpClient(7777);			
 		}
 		//==============================================================
+		void nRespTimer_tick(object sender, EventArgs e)
+        {
+            if(masterIPAddress != null)
+			{
+				UdpClient udpClient = new UdpClient();
+				udpClient.Connect(masterIPAddress.ToString(), 7777);
+	            nRespTimer.Start();
+				udpClient.Send(udp_send_buf, udp_send_buf.Length);
+			}            
+        }
+		//==============================================================
 		private void Window_Loaded(object sender, RoutedEventArgs e)
-		{
-//			dispatcherTimer = new DispatcherTimer();
-//            dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
-//            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
-            //dispatcherTimer.Start();
-			
+		{			
 			bgWorker.RunWorkerAsync();	
 			
+//			stop = false;
+//			send_udp(8);
 			
-//			UdpClient s = new UdpClient();
-//			IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("192.168.10.122"), 7777);
-//			byte[] bytes = Encoding.UTF8.GetBytes("123");
-//			udpClient.Send(bytes, bytes.Length, endPoint);
-			
-			stop = false;
-			send_udp(8);
+			UdpClient udpClient = new UdpClient();
+			udpClient.Connect("192.168.10.122", 7777);
+			byte [] udp_send_buf = Encoding.ASCII.GetBytes("123");
+			udpClient.Send(udp_send_buf, udp_send_buf.Length);
 		}
 	    //==============================================================================================
 	    private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -100,7 +111,10 @@ namespace TermoWifi
 				if (udpClient.Available > 0)
 				{
 					receiveBytes = udpClient.Receive(ref RemoteIpEndPoint);
-					(sender as BackgroundWorker).ReportProgress(50, receiveBytes);
+					packStruct pack;
+					pack.data = receiveBytes;
+					pack.ipAddress = RemoteIpEndPoint.Address;
+					(sender as BackgroundWorker).ReportProgress(50, pack);
 				}			
 				       
 		        Thread.Sleep(100);
@@ -112,6 +126,7 @@ namespace TermoWifi
 		private void btnConfigsClick(object sender, RoutedEventArgs e)
 		{
 				bgWorker.CancelAsync();
+				nRespTimer.Stop();
 				
 		}		
 		//===========================================================================================================================	
@@ -127,76 +142,89 @@ namespace TermoWifi
 	    {
 	    	if(e.Cancelled)
 	    	{
-		    	udpClient.Close();
-		    	ConfigsWindow cWin = new ConfigsWindow();
-		    	cWin.Closed +=  new EventHandler(cWin_Closed);
-		    	cWin.ShowDialog();	
+	    		if(masterIPAddress != null)
+	    		{
+	    			udpClient.Close();
+	    			ConfigsWindow cWin = new ConfigsWindow();		    	
+		    		cWin.masterIP = masterIPAddress;
+		    		cWin.Closed +=  new EventHandler(cWin_Closed);
+		    		cWin.ShowDialog();	
+	    		}
 	    	}
 	    	else bgWorker.RunWorkerAsync();
-	    } 
-		
-		//===========================================================================================================================
-		void send_udp( int aBufLng)
+	    }
+	    //===========================================================================================================================
+	    byte [] udp_send_buf;
+	    //===========================================================================================================================
+		void send_udp( )
 		{			
-			
-			UdpClient udpClient = new UdpClient();
-			udpClient.Connect("192.168.10.122", 7777);	
-			
-			byte [] udp_send_buf = new byte[aBufLng];
-            udp_send_buf[0] = (byte) 0x20;
-            
-			if(extTemp) udp_send_buf[1] = (byte) 0x80;
-			else        udp_send_buf[1] = (byte) 0x00;
-            
-            string str =  DateTime.Now.ToString("yyMMddHHmmss");
-            for(int  i = 0; i < 6; i++)
-                  udp_send_buf[i + 2] = (byte)Convert.ToByte(str.Substring(i * 2, 2));
-			
-			udpClient.Send(udp_send_buf, aBufLng);
+			if(masterIPAddress != null)
+			{
+				UdpClient udpClient = new UdpClient();
+				udpClient.Connect(masterIPAddress.ToString(), 7777);
+				
+				udp_send_buf = new byte[8];
+	            udp_send_buf[0] = (byte) 0x20;
+	            
+				if(extTemp) udp_send_buf[1] = (byte) 0x80;
+				else        udp_send_buf[1] = (byte) 0x00;
+	            
+	            string str =  DateTime.Now.ToString("yyMMddHHmmss");
+	            for(int  i = 0; i < 6; i++)
+	                  udp_send_buf[i + 2] = (byte)Convert.ToByte(str.Substring(i * 2, 2));
+				
+	            nRespTimer.Start();
+				udpClient.Send(udp_send_buf, udp_send_buf.Length);
+			}
 			
 		}
 		//===========================================================================================================================
 		void btnUpdateClick(object sender, RoutedEventArgs e)
 		{
 			stop = false;
-			send_udp(8);
+			send_udp();
 		}
 		//===========================================================================================================================
 		private void bgWorkerReport(object sender, ProgressChangedEventArgs e)
 	    {
-			byte [] receiveBytes = e.UserState as byte[];
-			string str = Encoding.ASCII.GetString(receiveBytes);//, rTmp1 = "", rTmp2 = "" ;
+			packStruct pack = (packStruct) e.UserState;
+			
+			byte [] receiveBytes = pack.data;
+			string str = Encoding.ASCII.GetString(receiveBytes);
 	    	switch(receiveBytes[0])
 		        {
 		            case (byte)0x10: // BROADCAST_DATA
 						
-						
-						//if(RemoteIpEndPoint.Address.ToString().Equals("192.168.10.122"))
-						{
-							
-							str = str.Substring(1,9) + "    ";		                
-			                
-		                
-			                if(str[0] != '0')
-			                	inTemp.Content = str.Substring(0,3) + "." + str.Substring(3,1);
-			                if(str[4] != '0')
-			                	outTemp.Content = str.Substring(4,3) + "." + str.Substring(7,1);
-			                
-			                if(receiveBytes[9] != 0) str = (receiveBytes[11] + ":" + 
-			                                                receiveBytes[10] + ":"+ 
-			                                                receiveBytes[9] + "\r\n" + 
-			                                                receiveBytes[12] + "." + 
-			                                                (receiveBytes[13]+1) + "."+ 
-			                                                receiveBytes[14]);			                
-			               
-			                lblTime.Content = str;
-			                
-			                //timeLbl.Dispatcher.BeginInvoke((Action)(() => timeLbl.Content = rTmp1 + "  ...  " + rTmp2 + " \\" + str + " \\"));
-			                 timeLbl.Content = "";
-						}
+	    				nRespTimer.Stop();
+		    			if(receiveBytes.Length > 9 && masterIPAddress == null) 
+		    			{
+		    				btnConfigs.Visibility = System.Windows.Visibility.Visible;
+		    				masterIPAddress =  pack.ipAddress;
+		    				stop = false;
+		    				send_udp();
+		    			}
+		    			
+		    			str = str.Substring(1,9) + "    ";
+		    			
+		    			if(str[0] != '0')
+		    				inTemp.Content = str.Substring(0,3) + "." + str.Substring(3,1);
+		    			if(str[4] != '0')
+		    				outTemp.Content = str.Substring(4,3) + "." + str.Substring(7,1);
+				                
+				        if(receiveBytes[9] != 0) str = (receiveBytes[11] + ":" + 
+		    			                                receiveBytes[10] + ":"+
+		    			                                receiveBytes[9] + "\r\n" +
+		    			                                receiveBytes[12] + "." +
+		    			                                (receiveBytes[13]+1) + "."+
+		    			                                receiveBytes[14]);
+				               
+				        lblTime.Content = str; 
+				        timeLbl.Content = "";						
 		                break;
 		
 		            case (byte) 0x21:// PLOT_DATA_ANS
+		                
+		                nRespTimer.Stop();
 		                
 		                timeLbl.Content = "plot data";
 	    	
@@ -219,7 +247,7 @@ namespace TermoWifi
 					    		outTemp.Content = tmp;
 					    		plot(Can2); 
 					    		extTemp = false;
-					    		send_udp(8);
+					    		send_udp();
 					    	}
 					    	else 	
 					    	{ 
@@ -234,15 +262,7 @@ namespace TermoWifi
 
 		
 		        }
-	    }
-		//==============================================================
-		private void dispatcherTimer_Tick(object sender, EventArgs e)
-		{
-		   //stop = false;
-			if(extTemp) extTemp = false;
-			else extTemp = true;
-			send_udp(8);
-		}			
+	    }		
 		//==============================================================
 		private void addLine (int x, int y, int x2, int y2, Brush col, int thik, Canvas Can)
 		{
