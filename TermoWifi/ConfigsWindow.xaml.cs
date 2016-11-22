@@ -40,11 +40,14 @@ namespace TermoWifi
 		public static string  tempReturn;
 		public static string  timeReturn;
 		
-		const int MODE_GET_WEEK  = 0;
-		const int MODE_GET_DAY_GFG  = 1;
-		const int MODE_GET_HYST  = 2;
-		//const int MODE_GET_HOLLY = 2;
-		int currentMode = MODE_GET_WEEK;
+//		const int MODE_GET_WEEK  = 0;
+//		const int MODE_GET_DAY_GFG  = 1;
+//		const int MODE_GET_HYST  = 2;
+//		//const int MODE_GET_HOLLY = 2;
+		int currentMode;
+		
+		const byte  OK_ANS			=				(0xAA);
+		const byte  BAD_ANS			=				(0xEE);
 		
 		
 		const byte PLOT_DATA			=		(0x20);
@@ -103,7 +106,7 @@ namespace TermoWifi
 				bg_Worker.RunWorkerAsync();
 				
 				nRespTimer = new DispatcherTimer();
-				nRespTimer.Interval = TimeSpan.FromMilliseconds(1000);
+				nRespTimer.Interval = TimeSpan.FromMilliseconds(2000);
 				nRespTimer.Tick += nRespTimer_tick;
 				
 				
@@ -113,6 +116,7 @@ namespace TermoWifi
 		//==============================================================
 		void startTimeout()
 		{
+			pbWait.Visibility = Visibility.Visible;
 			trysToReceive = 0;
 			nRespTimer.Start();
 		}
@@ -145,6 +149,7 @@ namespace TermoWifi
 	    	{
 	    			
 	    		case READ_WEEK_CONFIGS_ANS:
+					pbWait.Visibility = Visibility.Hidden;
 					nRespTimer.Stop();
 	    			cfgTitle.Content = "Неделя";
 	    			for(int i = 0; i < 7; i++)
@@ -162,6 +167,8 @@ namespace TermoWifi
 	    			int pNumb  = receiveBytes[1] & 0x0f;
 	    			int pCount = receiveBytes[2];
 	    			byte param =  Convert.ToByte((receiveBytes[1] & 0x0f) + 1);
+	    			
+	    			pbWait.Value = (100 / pCount) * pNumb;
 	    			
 	    			if(hDayCfg) param |= (byte)0x80;
 	    			
@@ -183,15 +190,27 @@ namespace TermoWifi
 	    			          	Temp = (String.Format("{0,4:N1}", (float)BitConverter.ToInt16(new byte[2] { receiveBytes[5], receiveBytes[6] }, 0)/10))});
 	    			
 	    			if(pNumb < pCount)
-	    				send_udp(MODE_GET_DAY_GFG, param);
+	    				send_udp(READ_DAY_CONFIGS, param);
+	    			else
+	    				pbWait.Visibility = Visibility.Hidden;
 	    			
 	    			break;
 	    			
 	    		case READ_USTANOVKI_ANS:
-	    			nRespTimer.Stop();
-	    			Hysteresys_cfg hystWin = new Hysteresys_cfg();
+	    			nRespTimer.Stop();	    			
+	    			pbWait.Visibility = Visibility.Hidden;
+	    			//hystWin.hystValue = (float)((float)receiveBytes[1] / 10);
+	    			Hysteresys_cfg hystWin = new Hysteresys_cfg((float)((float)receiveBytes[1] / 10));
 	    			hystWin.Closed += hystWinClosed;
 	    			hystWin.Show();
+	    			break;
+	    			
+	    		case OK_ANS:
+	    			pbWait.Visibility = Visibility.Hidden;
+	    			nRespTimer.Stop();
+	    			break;
+	    			
+	    		case BAD_ANS:
 	    			break;
 	    	}
 		}
@@ -235,31 +254,34 @@ namespace TermoWifi
 		private void Button_Click_GetHolly(object sender, RoutedEventArgs e)
 		{
 			items.Clear();
+			pbWait.Value = 0;
 			hDayCfg = true;
-			currentMode = MODE_GET_DAY_GFG;
-			send_udp(MODE_GET_DAY_GFG, 0x81);			
+			currentMode = READ_DAY_CONFIGS;
+			send_udp(READ_DAY_CONFIGS, 0x81);			
 		}		
 		//==============================================================
 		private void Button_Click_GetWork(object sender, RoutedEventArgs e)
 		{
 			items.Clear();
+			pbWait.Value = 0;
 			hDayCfg = false;
-			currentMode = MODE_GET_DAY_GFG;
-			send_udp(MODE_GET_DAY_GFG, 0x01);			
+			currentMode = READ_DAY_CONFIGS;
+			send_udp(READ_DAY_CONFIGS, 0x01);			
 		}
 		//==============================================================
 		private void Button_Click_hyst(object sender, RoutedEventArgs e)
 		{
-			currentMode = MODE_GET_HYST;
+			pbWait.Value = 0;
+			currentMode = READ_USTANOVKI;
 			send_udp(currentMode,0);
-//			Hysteresys_cfg hystWin = new Hysteresys_cfg();			
-//			hystWin.Closed += hystWinClosed;
-//			hystWin.Show();
 		}
 		//==============================================================
 		public void hystWinClosed(object sender, System.EventArgs e)
         {           
-            
+            currentMode = SAVE_USTANOVKI;
+            Hysteresys_cfg s  = sender as Hysteresys_cfg;
+            float a = s.hystValue;            
+            send_udp(currentMode, (byte)(a * 10));
         }
 		//==============================================================
 		private void Button_Click_add(object sender, RoutedEventArgs e)
@@ -279,8 +301,8 @@ namespace TermoWifi
 		void Button_Click_week(object sender, RoutedEventArgs e)
 		{
 			items.Clear();
-			currentMode = MODE_GET_WEEK;
-			send_udp(MODE_GET_WEEK, 0);
+			currentMode = READ_WEEK_CONFIGS;
+			send_udp(READ_WEEK_CONFIGS, 0);
 		}
 		//==============================================================
 		void lvConfigs_del_item(object sender, MouseButtonEventArgs e)
@@ -301,7 +323,7 @@ namespace TermoWifi
 			
 			switch(currentMode)
 			{
-				case MODE_GET_WEEK:
+				case READ_WEEK_CONFIGS:
 					dayType ^= (byte)(1 << currentItem);
 					
 					string path = "/TermoWifi;component/drawable/";
@@ -310,7 +332,7 @@ namespace TermoWifi
 					lvConfigs.Items.Refresh();
 					break;
 					
-				case MODE_GET_DAY_GFG:
+				case READ_DAY_CONFIGS:
 					sTemp = items[currentItem].Temp;
 			        sTime = items[currentItem].Time;	      
 					
@@ -347,24 +369,32 @@ namespace TermoWifi
 			
 			switch(aCmd)
 			{
-				case MODE_GET_WEEK:
+				case READ_WEEK_CONFIGS:
 					
 					udp_send_buf = new byte[1];
-					udp_send_buf[0] = (byte) READ_WEEK_CONFIGS;					
+					udp_send_buf[0] = (byte) aCmd;					
 					udpClient.Send(udp_send_buf, 1);
 					break;
 				
-				case MODE_GET_DAY_GFG:
+				case READ_DAY_CONFIGS:
 					udp_send_buf = new byte[2];
-					udp_send_buf[0] = (byte) READ_DAY_CONFIGS;
+					udp_send_buf[0] = (byte) aCmd;
 					udp_send_buf[1] = aParam;
 					udpClient.Send(udp_send_buf, 2);
 					break;
 					
-				case MODE_GET_HYST:
+				case READ_USTANOVKI:
 					udp_send_buf = new byte[1];
-					udp_send_buf[0] = (byte) READ_USTANOVKI;					
+					udp_send_buf[0] = (byte) aCmd;					
 					udpClient.Send(udp_send_buf, 1);
+					break;
+					
+				case SAVE_USTANOVKI:
+					udp_send_buf = new byte[3];
+					udp_send_buf[0] = (byte) aCmd;
+					udp_send_buf[1] = (byte) aParam;
+					udp_send_buf[2] = (byte) 0;
+					udpClient.Send(udp_send_buf, 3);
 					break;
 			}			
 		}

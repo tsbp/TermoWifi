@@ -71,7 +71,7 @@ namespace TermoWifi
 			bgWorker.WorkerSupportsCancellation = true;
 			
 			nRespTimer = new DispatcherTimer();
-			nRespTimer.Interval = TimeSpan.FromMilliseconds(1000);
+			nRespTimer.Interval = TimeSpan.FromMilliseconds(2000);
 			nRespTimer.Tick += nRespTimer_tick;
 			
 			udpClient = new UdpClient(7777);			
@@ -196,30 +196,34 @@ namespace TermoWifi
 		            case (byte)0x10: // BROADCAST_DATA
 						
 	    				nRespTimer.Stop();
-		    			if(receiveBytes.Length > 9 && masterIPAddress == null) 
+	    				
+	    				str = str.Substring(1,8) + "    ";
+			    			
+			    			if(str[0] != '0')
+			    				inTemp.Content = str.Substring(0,3) + "." + str.Substring(3,1);
+			    			if(str[4] != '0')
+			    				outTemp.Content = str.Substring(4,3) + "." + str.Substring(7,1);
+			    			
+		    			if(receiveBytes.Length > 9 ) 
 		    			{
-		    				btnConfigs.Visibility = System.Windows.Visibility.Visible;
-		    				masterIPAddress =  pack.ipAddress;
-		    				stop = false;
-		    				send_udp();
+		    				if(masterIPAddress == null)
+		    				{
+			    				btnConfigs.Visibility = System.Windows.Visibility.Visible;
+			    				masterIPAddress =  pack.ipAddress;
+			    				stop = false;
+			    				send_udp();
+		    				}		    			
+					                
+					        if(receiveBytes[9] != 0) str = (receiveBytes[11] + ":" + 
+			    			                                receiveBytes[10] + ":"+
+			    			                                receiveBytes[9] + "\r\n" +
+			    			                                receiveBytes[12] + "." +
+			    			                                (receiveBytes[13]+1) + "."+
+			    			                                receiveBytes[14]);
+					               
+					        lblTime.Content = str; 
+					        timeLbl.Content = "";
 		    			}
-		    			
-		    			str = str.Substring(1,9) + "    ";
-		    			
-		    			if(str[0] != '0')
-		    				inTemp.Content = str.Substring(0,3) + "." + str.Substring(3,1);
-		    			if(str[4] != '0')
-		    				outTemp.Content = str.Substring(4,3) + "." + str.Substring(7,1);
-				                
-				        if(receiveBytes[9] != 0) str = (receiveBytes[11] + ":" + 
-		    			                                receiveBytes[10] + ":"+
-		    			                                receiveBytes[9] + "\r\n" +
-		    			                                receiveBytes[12] + "." +
-		    			                                (receiveBytes[13]+1) + "."+
-		    			                                receiveBytes[14]);
-				               
-				        lblTime.Content = str; 
-				        timeLbl.Content = "";						
 		                break;
 		
 		            case (byte) 0x21:// PLOT_DATA_ANS

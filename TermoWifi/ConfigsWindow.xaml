@@ -114,6 +114,13 @@
 				</DataTemplate>
 			</ListView.ItemTemplate>
 		</ListView>
+		<ProgressBar
+			Name="pbWait"
+			Margin="0,10,0,0"
+			Visibility="Hidden"
+			DockPanel.Dock="Top"
+			Height="20"					
+			Width="200" />
 		<Grid
 			DockPanel.Dock="Bottom"
 			HorizontalAlignment="Center"
