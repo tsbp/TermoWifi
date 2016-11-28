@@ -109,15 +109,13 @@ namespace TermoWifi
 				nRespTimer.Interval = TimeSpan.FromMilliseconds(2000);
 				nRespTimer.Tick += nRespTimer_tick;
 				
-				
-				
 				udpClient = new UdpClient(7777);				
 		}
 		//==============================================================
 		void startTimeout()
 		{
 			pbWait.Visibility = Visibility.Visible;
-			trysToReceive = 0;
+			//trysToReceive = 0;
 			nRespTimer.Start();
 		}
 		//==============================================================
@@ -131,10 +129,9 @@ namespace TermoWifi
             	else
             	{
 					UdpClient udpClient = new UdpClient();
-					udpClient.Connect(masterIP.ToString(), 7777);
-				
-		            startTimeout();
-					udpClient.Send(udp_send_buf, udp_send_buf.Length);
+					udpClient.Connect(masterIP.ToString(), 7777);				
+		            //startTimeout();
+					udpClient.Send(udp_send_buf, udp_send_buf.Length);					
             	}
 			}            
         }
@@ -202,7 +199,7 @@ namespace TermoWifi
 	    			//hystWin.hystValue = (float)((float)receiveBytes[1] / 10);
 	    			Hysteresys_cfg hystWin = new Hysteresys_cfg((float)((float)receiveBytes[1] / 10));
 	    			hystWin.Closed += hystWinClosed;
-	    			hystWin.Show();
+	    			hystWin.ShowDialog();
 	    			break;
 	    			
 	    		case OK_ANS:
@@ -253,6 +250,8 @@ namespace TermoWifi
 		//==============================================================
 		private void Button_Click_GetHolly(object sender, RoutedEventArgs e)
 		{
+			btnAdd.Visibility = System.Windows.Visibility.Visible;
+			trysToReceive = 0;
 			items.Clear();
 			pbWait.Value = 0;
 			hDayCfg = true;
@@ -262,6 +261,8 @@ namespace TermoWifi
 		//==============================================================
 		private void Button_Click_GetWork(object sender, RoutedEventArgs e)
 		{
+			btnAdd.Visibility = System.Windows.Visibility.Visible;
+			trysToReceive = 0;
 			items.Clear();
 			pbWait.Value = 0;
 			hDayCfg = false;
@@ -271,6 +272,8 @@ namespace TermoWifi
 		//==============================================================
 		private void Button_Click_hyst(object sender, RoutedEventArgs e)
 		{
+			btnAdd.Visibility = System.Windows.Visibility.Hidden;
+			trysToReceive = 0;
 			pbWait.Value = 0;
 			currentMode = READ_USTANOVKI;
 			send_udp(currentMode,0);
@@ -290,16 +293,70 @@ namespace TermoWifi
 			items.Add(new User() {
 			          	number = (items.Count + 1).ToString(),// + " of " + pCount,
 			          	PicTime = "/TermoWifi;component/drawable/timeicon.png",
-			          	Time ="12:24",
+			          	Time ="00:00",
 			          	PicTemp = "/TermoWifi;component/drawable/tempicon.png",
-			          	Temp = "24,6"});
+			          	Temp = "19,0"});
+			sortbytime();
 		}		
+		//==============================================================
+		void sortbytime()
+		{
+			int [] time = new int[items.Count];
+			string [] temp = new string[items.Count];
+			
+			for (int i = 0; i < time.Length; i++)
+			{
+				time[i] = int.Parse((items[i].Time).Replace(":", ""));
+				temp[i] = items[i].Temp;
+			}
+			
+			for (int i = 0; i < time.Length; i++)
+				for (int j = i; j < time.Length; j++)
+					if(time[i] > time[j])
+					{
+						int a = time[j];
+						time[j] = time[i];
+						time[i] = a;
+						
+						string s = temp[j];
+						temp[j] = temp[i];
+						temp[i] = s;
+					}
+			
+			items.Clear();
+			for (int i = 0; i < time.Length; i++)
+			{
+				string s;
+				if(time[i] < 10) s = "00:0" + time[i];
+				else if(time[i] < 60) s = "00:" + time[i];
+				else if(time[i] < 1000)
+				{
+					s = "0" + (time[i] / 100) + ":" ;
+					if(time[i] % 100 < 10) s += "0" + (time[i] % 100);
+					   else  s += (time[i] % 100);
+				}
+				else 
+				{
+					s = (time[i] / 100) + ":";
+					if(time[i] % 100 < 10) s += "0" + (time[i] % 100);
+					   else  s += (time[i] % 100);
+				}
+					
+				items.Add(new User() {
+			          	number = (items.Count + 1).ToString(),// + " of " + pCount,
+			          	PicTime = "/TermoWifi;component/drawable/timeicon.png",
+			          	Time = s,
+			          	PicTemp = "/TermoWifi;component/drawable/tempicon.png",
+			          	Temp = temp[i]});
+			}
+		}
 		//==============================================================
 		string [] weekDays = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"};
 		byte dayType	= 0x60;
 		//==============================================================
 		void Button_Click_week(object sender, RoutedEventArgs e)
 		{
+			btnAdd.Visibility = System.Windows.Visibility.Hidden;
 			items.Clear();
 			currentMode = READ_WEEK_CONFIGS;
 			send_udp(READ_WEEK_CONFIGS, 0);
@@ -349,6 +406,7 @@ namespace TermoWifi
         {           
             items[currentItem].Temp = tempReturn;
             items[currentItem].Time = timeReturn;
+            sortbytime();
             lvConfigs.Items.Refresh();
         }
 		//===========================================================================================================================

@@ -29,28 +29,28 @@ namespace TermoWifi
 		public Hysteresys_cfg()
 		{
 			InitializeComponent();
-			slHyst.Value = (this.hystValue * 2.5);
+			slHyst.Value = (this.hystValue);
 			lblHyst.Content = String.Format("{0,4:N1}", this.hystValue);
 		}
 		
 		public Hysteresys_cfg(float aVal)
 		{
 			InitializeComponent();
-			slHyst.Value = (aVal * 2.5);
+			slHyst.Value = (aVal);
 			lblHyst.Content = String.Format("{0,4:N1}", aVal);
 		}
 		
 		//==============================================================
 		private void CloseButton_Click(object sender, RoutedEventArgs e)
 		{
-			hystValue = (float)(slHyst.Value/4);
+			hystValue = (float)(slHyst.Value);
 			Close();
 		}
 		//==============================================================
 		void slValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
 						
-			lblHyst.Content = String.Format("{0,4:N1}", slHyst.Value/4);
+			lblHyst.Content = String.Format("{0,4:N1}", slHyst.Value);
 		}
 	}
 }

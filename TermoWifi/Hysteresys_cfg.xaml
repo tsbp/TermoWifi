@@ -36,6 +36,8 @@
 			DockPanel.Dock="Top"
 			Name="slHyst"
 			ValueChanged="slValueChanged"
-			Margin="30,10,30,10" />
+			Margin="30,10,30,10" 
+		Maximum="2.5"
+		Minimum="0"/>
 	</DockPanel>
 </Window>

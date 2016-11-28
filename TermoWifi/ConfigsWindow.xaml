@@ -204,7 +204,9 @@
 					Source="Drawable\plot.png" />
 			</Button>
 			<Button
+				Name="btnAdd"
 				Click="Button_Click_add"
+				Visibility="Hidden"
 				Background="Transparent"
 				BorderBrush="Transparent"
 				BorderThickness="0"
