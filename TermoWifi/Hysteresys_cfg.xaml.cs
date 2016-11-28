@@ -24,7 +24,7 @@ namespace TermoWifi
 	public partial class Hysteresys_cfg : Window
 	{
 		
-		public float hystValue;
+		public double hystValue;
 		
 		public Hysteresys_cfg()
 		{
@@ -43,7 +43,7 @@ namespace TermoWifi
 		//==============================================================
 		private void CloseButton_Click(object sender, RoutedEventArgs e)
 		{
-			hystValue = (float)(slHyst.Value);
+			hystValue = Convert.ToDouble(String.Format("{0,4:N1}", slHyst.Value));//(float)(slHyst.Value);
 			Close();
 		}
 		//==============================================================
@@ -51,6 +51,11 @@ namespace TermoWifi
 		{
 						
 			lblHyst.Content = String.Format("{0,4:N1}", slHyst.Value);
+		}
+		//===========================================================================================================================
+		private void wMove(object sender, MouseButtonEventArgs e)
+		{
+			this.DragMove();
 		}
 	}
 }

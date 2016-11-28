@@ -12,6 +12,7 @@
 			ImageSource="drawable\part_config_bg.jpg"></ImageBrush>
 	</Window.Background>
 	<DockPanel
+		MouseDown="wMove"
 		LastChildFill="False">
 		<Button
 			Content="Close"
@@ -37,7 +38,9 @@
 			Name="slHyst"
 			ValueChanged="slValueChanged"
 			Margin="30,10,30,10" 
-		Maximum="2.5"
-		Minimum="0"/>
+			SmallChange="0.1"
+			TickFrequency="0.1"
+			Maximum="2.5"
+			Minimum="0"/>
 	</DockPanel>
 </Window>

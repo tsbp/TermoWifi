@@ -283,7 +283,7 @@ namespace TermoWifi
         {           
             currentMode = SAVE_USTANOVKI;
             Hysteresys_cfg s  = sender as Hysteresys_cfg;
-            float a = s.hystValue;            
+            double a = s.hystValue;            
             send_udp(currentMode, (byte)(a * 10));
         }
 		//==============================================================
