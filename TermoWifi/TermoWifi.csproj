@@ -121,7 +121,7 @@
     <None Include="Drawable\bload.png" />
     <None Include="Drawable\bload.png" />
     <None Include="Drawable\bsave.png" />
-    <None Include="Drawable\bsave.png" />
+    <Resource Include="Drawable\bsave.png" />
     <None Include="Drawable\heater_icon.png" />
     <None Include="Drawable\heater_icon.png" />
     <None Include="Drawable\inpic.png" />

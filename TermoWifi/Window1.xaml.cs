@@ -200,9 +200,17 @@ namespace TermoWifi
 	    				str = str.Substring(1,8) + "    ";
 			    			
 			    			if(str[0] != '0')
-			    				inTemp.Content = str.Substring(0,3) + "." + str.Substring(3,1);
+			    			{
+			    				string s = str.Substring(0,3) + "." + str.Substring(3,1);			    				
+			    				if(s[1] == '0') s = s.Substring(0, 1) + "" + s.Substring(2, 3);
+			    				inTemp.Content = s;
+			    			}
 			    			if(str[4] != '0')
-			    				outTemp.Content = str.Substring(4,3) + "." + str.Substring(7,1);
+			    			{
+			    				string s = str.Substring(4,3) + "." + str.Substring(7,1);
+			    				if(s[1] == '0') s = s.Substring(0, 1) + "" + s.Substring(2, 3);
+			    				outTemp.Content = s;
+			    			}
 			    			
 		    			if(receiveBytes.Length > 9 ) 
 		    			{
@@ -236,12 +244,8 @@ namespace TermoWifi
 				    	for(int i = 0; i< 24; i++)
 				    		aBuf[i] = BitConverter.ToInt16(new byte[2] { receiveBytes[i*2+1], receiveBytes[i*2+2] }, 0);
 				    	
-				    	string sign = "+";
-				    	if(aBuf[aBuf.Length-1] < 0) 
-				    	{
-				    		sign = "-";
-				    		aBuf[aBuf.Length-1] *= -1; 
-				    	}
+				    	string sign = "";
+				    	if(aBuf[aBuf.Length-1] > 0) sign = "+"; 
 				    		
 				    	 string tmp = sign + String.Format("{0,4:N1}",((float)aBuf[aBuf.Length-1]/10)); 
 				    	 if(!stop)
@@ -307,8 +311,8 @@ namespace TermoWifi
 			 	        i*HGRID_SPACING + LEFT_OFFSET, aY + TOP_OFFSET + PLOT_HEIGH,
 			 	       Brushes.Gray, 1, can);
 			 
-			 int tmax = aBuf[0]; 
-			 int tmin = aBuf[0];
+			 short tmax = aBuf[0]; 
+			 short tmin = aBuf[0];
 	         for(int i = 1; i < POINTS_CNT; i++) if (tmax < aBuf[i]) tmax = aBuf[i]; // tmax
 	         for(int i = 1; i < POINTS_CNT; i++) if (tmin > aBuf[i]) tmin = aBuf[i]; // tmin
 	

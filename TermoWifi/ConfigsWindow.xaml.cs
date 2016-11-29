@@ -44,6 +44,9 @@ namespace TermoWifi
 //		const int MODE_GET_DAY_GFG  = 1;
 //		const int MODE_GET_HYST  = 2;
 //		//const int MODE_GET_HOLLY = 2;
+//		enum MODE {mWeek, mCfg, mHyst};
+//		MODE mode;
+		
 		int currentMode;
 		
 		const byte  OK_ANS			=				(0xAA);
@@ -68,6 +71,8 @@ namespace TermoWifi
 	    
 	    const int trysToReceiveCount = 5;
 	    int trysToReceive = 0;
+	    
+	    byte currentPeroid;
 	    
 	    private BackgroundWorker bg_Worker;
         
@@ -115,7 +120,7 @@ namespace TermoWifi
 		void startTimeout()
 		{
 			pbWait.Visibility = Visibility.Visible;
-			//trysToReceive = 0;
+			trysToReceive = 0;
 			nRespTimer.Start();
 		}
 		//==============================================================
@@ -125,18 +130,21 @@ namespace TermoWifi
 			{
             	trysToReceive++;
             	if(trysToReceive > trysToReceiveCount)
+            	{
             		MessageBox.Show("Could not get data!", "Error");
+            		nRespTimer.Stop();
+            	}
             	else
             	{
 					UdpClient udpClient = new UdpClient();
-					udpClient.Connect(masterIP.ToString(), 7777);				
-		            //startTimeout();
+					udpClient.Connect(masterIP.ToString(), 7777);
 					udpClient.Send(udp_send_buf, udp_send_buf.Length);					
             	}
 			}            
         }
 		//=============================================================================================
 		bool hDayCfg = false;
+		byte [] day = new byte[7];
 		//=============================================================================================
 		private void bg_WorkerReport(object sender, ProgressChangedEventArgs e)
 	    {
@@ -145,15 +153,18 @@ namespace TermoWifi
 			switch(receiveBytes[0])
 	    	{
 	    			
-	    		case READ_WEEK_CONFIGS_ANS:
+	    		case READ_WEEK_CONFIGS_ANS:					
 					pbWait.Visibility = Visibility.Hidden;
 					nRespTimer.Stop();
 	    			cfgTitle.Content = "Неделя";
+	    			
+	    			for(int i = 0; i < 7; i++) day[i] = receiveBytes[i+1];	    				
+	    					
 	    			for(int i = 0; i < 7; i++)
 	    			{
 	    				string path = "/TermoWifi;component/drawable/";
-	    				if((dayType & (1 << i)) != 0) 	path += "beer.png";		
-	    				else 							path += "shovel.png";
+	    				if(day[i] == 'H') 	path += "beer.png";
+	    				else 				path += "shovel.png";
 	    				items.Add(new User() {PicTime = path, Time = weekDays[i]});
 	    			}
 	    			break;
@@ -189,28 +200,55 @@ namespace TermoWifi
 	    			if(pNumb < pCount)
 	    				send_udp(READ_DAY_CONFIGS, param);
 	    			else
+	    			{
+	    				btnAdd.Visibility = Visibility.Visible;
 	    				pbWait.Visibility = Visibility.Hidden;
-	    			
+	    			}	    			
 	    			break;
 	    			
 	    		case READ_USTANOVKI_ANS:
 	    			nRespTimer.Stop();	    			
 	    			pbWait.Visibility = Visibility.Hidden;
-	    			//hystWin.hystValue = (float)((float)receiveBytes[1] / 10);
 	    			Hysteresys_cfg hystWin = new Hysteresys_cfg((float)((float)receiveBytes[1] / 10));
 	    			hystWin.Closed += hystWinClosed;
 	    			hystWin.ShowDialog();
 	    			break;
 	    			
 	    		case OK_ANS:
-	    			pbWait.Visibility = Visibility.Hidden;
-	    			nRespTimer.Stop();
+	    			switch(currentMode)
+	    			{
+	    				case SAVE_WEEK_CONFIGS:	    					
+	    				case SAVE_USTANOVKI:
+	    					bSave.Visibility = Visibility.Hidden;
+	    					pbWait.Visibility = Visibility.Hidden;
+	    					nRespTimer.Stop(); 
+	    					break;
+	    					
+	    				case SAVE_DAY_CONFIGS:
+	    					if(currentPeroid < items.Count)
+				            {
+	    					 	pbWait.Value = (100 / items.Count) * currentPeroid;
+				                currentPeroid++;
+				                formBuffer(SAVE_DAY_CONFIGS);
+				                send_udp(currentMode, 0);	
+				
+				            }
+				            else
+				            {
+				                bSave.Visibility = Visibility.Hidden;//.setVisibility(View.GONE);
+				                pbWait.Visibility = Visibility.Hidden;//.setVisibility(View.INVISIBLE);	
+				                nRespTimer.Stop();
+				            }
+	    					break;
+	    			}
+	    			
 	    			break;
 	    			
 	    		case BAD_ANS:
 	    			break;
 	    	}
 		}
+		
 		//==============================================================================================		
 		IPEndPoint RemoteIpEndPoint;
 		//==============================================================================================
@@ -250,8 +288,9 @@ namespace TermoWifi
 		//==============================================================
 		private void Button_Click_GetHolly(object sender, RoutedEventArgs e)
 		{
-			btnAdd.Visibility = System.Windows.Visibility.Visible;
-			trysToReceive = 0;
+			//mode = MODE.mCfg;
+			bSave.Visibility = Visibility.Hidden;
+			btnAdd.Visibility = Visibility.Hidden;
 			items.Clear();
 			pbWait.Value = 0;
 			hDayCfg = true;
@@ -261,8 +300,9 @@ namespace TermoWifi
 		//==============================================================
 		private void Button_Click_GetWork(object sender, RoutedEventArgs e)
 		{
-			btnAdd.Visibility = System.Windows.Visibility.Visible;
-			trysToReceive = 0;
+			//mode = MODE.mCfg;
+			bSave.Visibility = Visibility.Hidden;
+			btnAdd.Visibility = Visibility.Hidden;
 			items.Clear();
 			pbWait.Value = 0;
 			hDayCfg = false;
@@ -272,12 +312,52 @@ namespace TermoWifi
 		//==============================================================
 		private void Button_Click_hyst(object sender, RoutedEventArgs e)
 		{
+			//mode = MODE.mHyst;
 			btnAdd.Visibility = System.Windows.Visibility.Hidden;
-			trysToReceive = 0;
 			pbWait.Value = 0;
 			currentMode = READ_USTANOVKI;
 			send_udp(currentMode,0);
 		}
+		//==============================================================
+		void Button_Click_week(object sender, RoutedEventArgs e)
+		{
+			//mode = MODE.mWeek;
+			pbWait.Value = 0;
+			bSave.Visibility = Visibility.Hidden;
+			btnAdd.Visibility = System.Windows.Visibility.Hidden;
+			items.Clear();
+			currentMode = READ_WEEK_CONFIGS;
+			send_udp(READ_WEEK_CONFIGS, 0);
+		}
+		//==============================================================
+		void Button_Click_save(object sender, RoutedEventArgs e)
+		{
+			switch(currentMode)
+			{
+				case READ_WEEK_CONFIGS:
+					pbWait.Value = 0;
+					currentMode = SAVE_WEEK_CONFIGS;
+					send_udp(currentMode, 0);
+					break;
+					
+				case READ_DAY_CONFIGS:
+					pbWait.Value = 0;
+					currentPeroid = 1;
+					currentMode = SAVE_DAY_CONFIGS;
+					send_udp(currentMode, 0);
+					break;
+			}
+						
+		}
+		//==============================================================
+		public void confWinClosed(object sender, System.EventArgs e)
+        {           
+			bSave.Visibility = Visibility.Visible;
+            items[currentItem].Temp = tempReturn;
+            items[currentItem].Time = timeReturn;
+            sortbytime();
+            lvConfigs.Items.Refresh();
+        }
 		//==============================================================
 		public void hystWinClosed(object sender, System.EventArgs e)
         {           
@@ -289,11 +369,11 @@ namespace TermoWifi
 		//==============================================================
 		private void Button_Click_add(object sender, RoutedEventArgs e)
 		{
-			
+			bSave.Visibility = System.Windows.Visibility.Visible;
 			items.Add(new User() {
 			          	number = (items.Count + 1).ToString(),// + " of " + pCount,
 			          	PicTime = "/TermoWifi;component/drawable/timeicon.png",
-			          	Time ="00:00",
+			          	Time ="23:59",
 			          	PicTemp = "/TermoWifi;component/drawable/tempicon.png",
 			          	Temp = "19,0"});
 			sortbytime();
@@ -352,15 +432,7 @@ namespace TermoWifi
 		}
 		//==============================================================
 		string [] weekDays = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"};
-		byte dayType	= 0x60;
-		//==============================================================
-		void Button_Click_week(object sender, RoutedEventArgs e)
-		{
-			btnAdd.Visibility = System.Windows.Visibility.Hidden;
-			items.Clear();
-			currentMode = READ_WEEK_CONFIGS;
-			send_udp(READ_WEEK_CONFIGS, 0);
-		}
+		byte dayType	= 0x60;		
 		//==============================================================
 		void lvConfigs_del_item(object sender, MouseButtonEventArgs e)
 		{
@@ -381,11 +453,12 @@ namespace TermoWifi
 			switch(currentMode)
 			{
 				case READ_WEEK_CONFIGS:
-					dayType ^= (byte)(1 << currentItem);
+					bSave.Visibility = Visibility.Visible;
 					
+					dayType ^= (byte)(1 << currentItem);					
 					string path = "/TermoWifi;component/drawable/";
-					if((dayType & (1 << currentItem)) != 0) 	items[currentItem].PicTime = path + "beer.png";
-					else 										items[currentItem].PicTime = path + "shovel.png";					
+					if(day[currentItem] == 'W') { day[currentItem] = (byte)'H';	items[currentItem].PicTime = path + "beer.png";}
+					else 						{ day[currentItem] = (byte)'W';	items[currentItem].PicTime = path + "shovel.png";}
 					lvConfigs.Items.Refresh();
 					break;
 					
@@ -396,19 +469,11 @@ namespace TermoWifi
 					PartConfig cWin = new PartConfig();		
 					cWin.lblTemp.Content = sTemp;
 					cWin.lblTime.Content = sTime;
-					cWin.Closed += cWinClosed;
+					cWin.Closed += confWinClosed;
 					cWin.Show();
 					break;
 			}	       
 		}
-		//==============================================================
-		public void cWinClosed(object sender, System.EventArgs e)
-        {           
-            items[currentItem].Temp = tempReturn;
-            items[currentItem].Time = timeReturn;
-            sortbytime();
-            lvConfigs.Items.Refresh();
-        }
 		//===========================================================================================================================
 		private void rectangle2_MouseDown(object sender, MouseButtonEventArgs e)
 		{
@@ -454,7 +519,38 @@ namespace TermoWifi
 					udp_send_buf[2] = (byte) 0;
 					udpClient.Send(udp_send_buf, 3);
 					break;
+					
+				case SAVE_DAY_CONFIGS:
+					formBuffer(aCmd);
+					udpClient.Send(udp_send_buf, udp_send_buf.Length);
+					break;
+					
+				case SAVE_WEEK_CONFIGS:
+					udp_send_buf = new byte[8];
+					udp_send_buf[0] = (byte)aCmd;
+					for(int i = 0; i < 7; i++)
+						udp_send_buf[i+1] = day[i];
+					
+					udpClient.Send(udp_send_buf, udp_send_buf.Length);
+					break;
 			}			
 		}
+		//==============================================================================================
+	    private void formBuffer(int aCmd)
+	    {
+	       udp_send_buf = new byte[8];
+	       udp_send_buf[0] = (byte) aCmd;
+	       if (hDayCfg) udp_send_buf[1] = (byte)0x80;
+	       else         udp_send_buf[1] = (byte)0x00;
+	       
+	       udp_send_buf[2] = (byte) currentPeroid;
+	       udp_send_buf[3] = (byte) items.Count;//.length;
+	       udp_send_buf[4] = byte.Parse((items[currentPeroid - 1].Time).Substring(0,items[currentPeroid - 1].Time.IndexOf(":")));//Byte.valueOf(time[currentPeroid-1].substring(0,2));
+	       udp_send_buf[5] = byte.Parse((items[currentPeroid - 1].Time).Substring(items[currentPeroid - 1].Time.IndexOf(":") + 1));//Byte.valueOf(time[currentPeroid-1].substring(3,5));
+	
+	       short shrt = short.Parse((items[currentPeroid - 1].Temp).Replace(",", ""));//Short.valueOf(temp[currentPeroid-1].substring(0,2) + temp[currentPeroid-1].substring(3,4));
+	       udp_send_buf[6] = (byte)(shrt & 0xff);
+	       udp_send_buf[7] = (byte)((shrt >> 8) & 0xff);
+	    }
 	}
 }
